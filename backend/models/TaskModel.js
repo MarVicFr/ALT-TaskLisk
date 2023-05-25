@@ -1,31 +1,31 @@
 const mongoose = require("mongoose");
 
 const taskSchema = new mongoose.Schema({
-  taskTitle: {
+  title: {
     type: String,
     required: true,
   },
-  taskDesc: {
+  desc: {
     type: String,
     required: true,
   },
-  taskPriority: {
+  priority: {
+    type: Number,
+    required: true,
+  },
+  statut: {
+    type: Number,
+    required: true,
+  },
+  dueDate: {
     type: String,
     required: true,
   },
-  taskStatut: {
-    type: String,
-    required: true,
-  },
-  taskDueDate: {
-    type: String,
-    required: true,
-  },
-  taskAssignedBy: {
+  assignedBy: {
     type: Object,
     required: true,
   },
-  taskAssignment: {
+  assignment: {
     type: [{}],
     required: true,
   },

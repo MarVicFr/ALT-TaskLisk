@@ -7,23 +7,23 @@ module.exports.getTasks = async (req, res) => {
 
 module.exports.saveTask = async (req, res) => {
   const {
-    taskTitle,
-    taskDesc,
-    taskPriority,
-    taskStatut,
-    taskDueDate,
-    taskAssignedBy,
-    taskAssignment,
+    title,
+    desc,
+    priority,
+    statut,
+    dueDate,
+    assignedBy,
+    assignment,
   } = req.body;
 
   TaskModel.create({
-    taskTitle,
-    taskDesc,
-    taskPriority,
-    taskStatut,
-    taskDueDate,
-    taskAssignedBy,
-    taskAssignment,
+    title,
+    desc,
+    priority,
+    statut,
+    dueDate,
+    assignedBy,
+    assignment,
   }).then((data) => {
     console.log("Added Sucessfully");
     console.log("this is data", data);

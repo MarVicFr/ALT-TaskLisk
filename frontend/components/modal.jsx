@@ -18,51 +18,47 @@ import "react-datepicker/dist/react-datepicker.css";
 
 import Select from "react-select";
 
-import { addTask, updateTask} from "../utils/HandleApi";
+import { addTask, updateTask } from "../utils/HandleApi";
+
+const ModalTask = ({
+  tasks,
+  show,
+  handleClose,
+  handleShow,
+  isUpdating,
+  setIsUpdating,
+}) => {
+  console.log("tasks :", tasks);
 
 
-
-
-
-const ModalTask =({ item }) => {
-
-  console.log("item :", item);
-  
-  // Modals
-  const [show, setShow] = useState(false);
-  
-  // Modal functions
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-  
   // Date-picker
-  const [taskDueDate, setTaskDueDate] = useState(new Date());
-  
+  const [dueDate, setDueDate] = useState(new Date());
+
   // Task priority
-  const [taskPriority, setTaskPriority] = useState("Moyenne");
-  
+  const [priority, setPriority] = useState(2);
+
   // Task Statut
-  const [taskStatut, setTaskStatut] = useState("En attente");
-  
+  const [statut, setStatut] = useState(2);
+
+
   // Task State
   const radios = [
-    { name: "En attente", value: "1", className: "outline-primary" },
-    { name: "En cours", value: "2", className: "outline-danger" },
-    { name: "Terminé", value: "3", className: "outline-success" },
+    { name: "En attente", value: 1, className: "outline-primary" },
+    { name: "En cours", value: 2, className: "outline-danger" },
+    { name: "Terminé", value: 3, className: "outline-success" },
   ];
-  
+
   // Task Creator
-  const [taskAssignedBy, setTaskAssignedBy] = useState({});
-  
+  const [assignedBy, setAssignedBy] = useState({});
+
   // Task Assignment
-  const [taskAssignment, setTaskAssignment] = useState([]);
-  
-  const [task, setTask] = useState(null);
+  const [assignment, setAssignment] = useState([]);
 
+  // const [task, setTask] = useState(null);
 
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [taskTitle, setTaskTitle] = useState("");
-  const [taskDesc, setTaskDesc] = useState("");
+  // const [isUpdating, setIsUpdating] = useState(false);
+  const [title, setTitle] = useState("");
+  const [desc, setDesc] = useState("");
 
   const optionAssignments = [
     { value: "jack", label: "Jack" },
@@ -75,26 +71,8 @@ const ModalTask =({ item }) => {
     { value: "amine", label: "Amine" },
     { value: "carole", label: "Carole" },
   ];
-  useEffect(() => {
-    setTask(item)
-    setIsUpdating(!isUpdating)
-    setTaskTitle(item.taskTitle)
-    setTaskDesc(item.taskDesc)
-    setTaskPriority(item.taskPriority)
-    setTaskStatut(item.taskStatut)
-    setTaskAssignedBy(item.taskAssignedBy)
-    setTaskAssignment(item.taskAssignment)
-  },[item])
-  
-  // useEffect(() => {
-  //   handleShow()
-  // },[task])
 
-
-
-  console.log("TASK DATA :",  task );
-  console.log("taskAssignedBy DATA :",  taskAssignedBy );
-  console.log("taskAssignmentDATA :",  taskAssignment );
+  // console.log("taskStatut :", taskStatut);
 
   return (
     <>
@@ -117,8 +95,8 @@ const ModalTask =({ item }) => {
               <Form.Control
                 type="text"
                 placeholder="Donner un titre à votre tâche ..."
-                value={taskTitle}
-                onChange={(e) => setTaskTitle(e.target.value)}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 autoFocus
                 required
               />
@@ -132,8 +110,8 @@ const ModalTask =({ item }) => {
                 as="textarea"
                 rows={3}
                 placeholder="Renseigner une description ..."
-                value={taskDesc}
-                onChange={(e) => setTaskDesc(e.target.value)}
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
                 required
               />
             </Form.Group>
@@ -146,13 +124,13 @@ const ModalTask =({ item }) => {
                 {radios.map((radio, idx) => (
                   <ToggleButton
                     key={idx}
-                    id={`radio-${idx}`}
+                    id={radio.value}
                     type="radio"
                     variant={radio.className}
                     name="radio"
                     value={radio.name}
-                    checked={taskStatut === radio.name}
-                    onChange={(e) => setTaskStatut(e.currentTarget.value)}
+                    checked={statut === radio.value}
+                    onChange={(e) => setStatut(e.currentTarget.id)}
                   >
                     {radio.name}
                   </ToggleButton>
@@ -165,24 +143,24 @@ const ModalTask =({ item }) => {
               <DatePicker
                 locale="fr"
                 dateFormat="dd/MM/yy"
-                selected={taskDueDate}
-                onChange={(date) => setTaskDueDate(date)}
+                selected={dueDate}
+                onChange={(date) => setDueDate(date)}
               />
             </div>
             <div className="taskItem d-flex justify-content-between mb-4">
               <p>Importance :</p>
               <DropdownButton
                 align="end"
-                title={taskPriority ? taskPriority : "Priorité"}
+                title={priority ? priority : "Priorité"}
                 id="dropdown-menu-align-end"
-                onSelect={(e) => setTaskPriority(e)}
+                onSelect={(e) => setPriority(e)}
                 multiple={true}
               >
-                <Dropdown.Item eventKey="basse">Basse</Dropdown.Item>
+                <Dropdown.Item name="Moyenne" eventKey={1}>Basse</Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item eventKey="Moyenne">Moyenne</Dropdown.Item>
+                <Dropdown.Item eventKey={2} active>Moyenne</Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item eventKey="Haute">Haute</Dropdown.Item>
+                <Dropdown.Item eventKey={3}>Haute</Dropdown.Item>
               </DropdownButton>
             </div>
             <div className="taskItem d-flex justify-content-between mb-4">
@@ -190,7 +168,7 @@ const ModalTask =({ item }) => {
               <Select
                 options={optionAssignments}
                 onChange={(selectedOwnerOption) =>
-                  setTaskAssignedBy(selectedOwnerOption)
+                  setAssignedBy(selectedOwnerOption)
                 }
               />
             </div>
@@ -198,7 +176,7 @@ const ModalTask =({ item }) => {
               <label>Affécter à:</label>
               <Select
                 options={optionAssignments}
-                onChange={(selectedOption) => setTaskAssignment(selectedOption)}
+                onChange={(selectedOption) => setAssignment(selectedOption)}
                 isMulti
               />
             </div>
@@ -213,6 +191,7 @@ const ModalTask =({ item }) => {
             onClick={
               isUpdating
                 ? () => {
+                  // TO FIX
                     updateTask(
                       taskId,
                       taskTitle,
@@ -224,20 +203,20 @@ const ModalTask =({ item }) => {
                   }
                 : () => {
                     addTask(
-                      taskTitle,
-                      setTaskTitle,
-                      taskDesc,
-                      setTaskDesc,
-                      taskPriority,
-                      setTaskPriority,
-                      taskStatut,
-                      setTaskStatut,
-                      taskDueDate,
-                      setTaskDueDate,
-                      taskAssignedBy,
-                      setTaskAssignedBy,
-                      taskAssignment,
-                      setTaskAssignment
+                      title,
+                      setTitle,
+                      desc,
+                      setDesc,
+                      priority,
+                      setPriority,
+                      statut,
+                      setStatut,
+                      dueDate,
+                      setDueDate,
+                      assignedBy,
+                      setAssignedBy,
+                      assignment,
+                      setAssignment
                       // setTasks
                     );
                     handleClose();
@@ -250,6 +229,6 @@ const ModalTask =({ item }) => {
       </Modal>
     </>
   );
-}
+};
 
 export default ModalTask;

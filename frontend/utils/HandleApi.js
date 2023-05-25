@@ -4,52 +4,56 @@ const baseUrl = "http://localhost:5001";
 
 const getTasks = (setTasks) => {
   axios.get(baseUrl).then(({ data }) => {
-    console.log("voici la data =>", data);
+    console.log("voici la data de getTasks =>", data);
     setTasks(data);
   });
 };
 
 const addTask = (
-  taskTitle,
-  setTaskTitle,
-  taskDesc,
-  setTaskDesc,
-  taskPriority,
-  setTaskPriority,
-  taskStatut,
-  setTaskStatut,
-  taskDueDate,
-  setTaskDueDate,
-  taskAssignedBy,
-  setTaskAssignedBy,
-  taskAssignment,
-  setTaskAssignment,
-//   setTasks
+  title,
+  setTitle,
+  desc,
+  setDesc,
+  priority,
+  setPriority,
+  statut,
+  setStatut,
+  dueDate,
+  setDueDate,
+  assignedBy,
+  setAssignedBy,
+  assignment,
+  setAssignment,
+  setTasks
 ) => {
   axios
     .post(`${baseUrl}/save`, {
-      taskTitle,
-      taskDesc,
-      taskPriority,
-      taskStatut,
-      taskDueDate,
-      taskAssignedBy,
-      taskAssignment,
-    //   setTasks
+      title,
+      desc,
+      priority,
+      statut,
+      dueDate,
+      assignedBy,
+      assignment,
     })
     .then((data) => {
-      console.log("cette data : ", data);
-      setTaskTitle("");
-      setTaskDesc("");
-      setTaskPriority("Moyenne");
-      setTaskStatut("En attente");
-      setTaskDueDate(new Date());
-      setTaskAssignedBy({});
-      setTaskAssignment([]);
-      getTasks(setTasks);
-    })
+      console.log("cette data de addTask : ", data);
+      setTitle("");
+      setDesc("")
+      setPriority(null);
+      setStatut(null);
+      setDueDate(new Date());
+      setAssignedBy({});
+      setAssignment([]);
+      // setTasks(data);
+      getTasks(()=> setTasks())
+    }
+    )
+
     .catch((err) => console.log(err));
 };
+
+// TO FIX
 
 const updateTask = (taskId, text, setTasks, setText, setIsloading) => {
   axios
