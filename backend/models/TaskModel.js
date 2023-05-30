@@ -13,7 +13,7 @@ const taskSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  statut: {
+  state: {
     type: Number,
     required: true,
   },
@@ -21,11 +21,11 @@ const taskSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  assignedBy: {
+  createdBy: {
     type: Object,
     required: true,
   },
-  assignment: {
+  assignedTo: {
     type: [{}],
     required: true,
   },

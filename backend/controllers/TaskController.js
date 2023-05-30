@@ -6,34 +6,36 @@ module.exports.getTasks = async (req, res) => {
 };
 
 module.exports.saveTask = async (req, res) => {
-  const {
-    title,
-    desc,
-    priority,
-    statut,
-    dueDate,
-    assignedBy,
-    assignment,
-  } = req.body;
+  const { title, desc, priority, state, dueDate, createdBy, assignedTo } =
+    req.body;
 
   TaskModel.create({
     title,
     desc,
     priority,
-    statut,
+    state,
     dueDate,
-    assignedBy,
-    assignment,
+    createdBy,
+    assignedTo,
   }).then((data) => {
     console.log("Added Sucessfully");
-    console.log("this is data", data);
+    console.log("this is data from CONTROLLER :", data);
     res.send(data);
   });
 };
 
 module.exports.updateTask = async (req, res) => {
-  const { _id, text } = req.body;
-  TaskModel.findByIdAndUpdate(_id, { text })
+  const { _id, title, desc, priority, state, dueDate, createdBy, assignedTo } =
+    req.body;
+  TaskModel.findByIdAndUpdate(_id, {
+    title,
+    desc,
+    priority,
+    state,
+    dueDate,
+    createdBy,
+    assignedTo,
+  })
     .then(() => res.send("Updated successfully !"))
     .catch((err) => console.log(err));
 };

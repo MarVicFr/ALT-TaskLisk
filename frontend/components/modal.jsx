@@ -27,38 +27,48 @@ const ModalTask = ({
   handleShow,
   isUpdating,
   setIsUpdating,
+  setTasks,
+  updateId,
 }) => {
-  console.log("tasks :", tasks);
+  console.log("Mes tasks MODAL :", tasks);
 
+  // Original task
+  const originalTask = {
+    title: "",
+    desc: "",
+    state: 2,
+    dueDate: "",
+    priority: 2,
+    createdBy: {},
+    createdAt: new Date(),
+    assignedTo: [],
+  };
 
-  // Date-picker
-  const [dueDate, setDueDate] = useState(new Date());
+  // NewTask
+  const [newTask, setNewTask] = useState(originalTask);
+  const [editedTask, setEditedTask] = useState(originalTask);
 
-  // Task priority
-  const [priority, setPriority] = useState(2);
-
-  // Task Statut
-  const [statut, setStatut] = useState(2);
-
+  useEffect(() => {
+    tasks.map((task) => {
+      if (task._id == updateId) {
+        setEditedTask(task);
+      }
+    });
+  }, [updateId]);
 
   // Task State
-  const radios = [
+  const states = [
     { name: "En attente", value: 1, className: "outline-primary" },
-    { name: "En cours", value: 2, className: "outline-danger" },
+    { name: "En cours", value: 2, className: "outline-warning" },
     { name: "Terminé", value: 3, className: "outline-success" },
   ];
 
-  // Task Creator
-  const [assignedBy, setAssignedBy] = useState({});
-
-  // Task Assignment
-  const [assignment, setAssignment] = useState([]);
-
-  // const [task, setTask] = useState(null);
-
-  // const [isUpdating, setIsUpdating] = useState(false);
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
+  // Task Priority
+  const priorities = [
+    { name: "Basse", value: 1, className: "outline-info" },
+    { name: "Moyenne", value: 2, className: "outline-secondary" },
+    { name: "Haute", value: 3, className: "outline-danger" },
+  ];
 
   const optionAssignments = [
     { value: "jack", label: "Jack" },
@@ -72,14 +82,36 @@ const ModalTask = ({
     { value: "carole", label: "Carole" },
   ];
 
-  // console.log("taskStatut :", taskStatut);
+  // Convert State
+  const statut = (item) =>
+    radios.map((el) => {
+      if (item.state === el.value) return el.name;
+    });
+
+  // Convert priority
+  const priority = (item) => {
+    const found = priorities.map((el) => {
+      el.value === item;
+      if (el.value === item) {
+        const name = el.name;
+        return name;
+      }
+    });
+    return found;
+  };
+
+  console.log("editedTask.createdBy.label", editedTask.createdBy.label);
 
   return (
     <>
-      <Button variant="primary" onClick={handleShow}>
+      <Button variant="primary" className="m-2" onClick={handleShow}>
         Ajouter une tâche
       </Button>
-
+      <ButtonGroup style={{display: 'flex'}}>
+      <Button variant="info">En attente</Button>
+        <Button variant="warning">En cours</Button>
+        <Button variant="success">Terminée</Button>
+      </ButtonGroup>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           {isUpdating ? (
@@ -90,140 +122,204 @@ const ModalTask = ({
         </Modal.Header>
         <Modal.Body>
           <Form className="was-validated">
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+            <Form.Group className="taskItem d-flex justify-content-between mb-4 ">
               <Form.Label>Nom de la tâche :</Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Donner un titre à votre tâche ..."
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={isUpdating ? editedTask.title : newTask.title}
+                onChange={(e) => {
+                  isUpdating
+                    ? setEditedTask((prevState) => ({
+                        ...prevState,
+                        title: e.target.value,
+                      }))
+                    : setNewTask((prevState) => ({
+                        ...prevState,
+                        title: e.target.value,
+                      }));
+                }}
                 autoFocus
                 required
               />
             </Form.Group>
-            <Form.Group
-              className="mb-3"
-              controlId="exampleForm.ControlTextarea1"
-            >
+            <Form.Group className="mb-3">
               <Form.Label>Description :</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 placeholder="Renseigner une description ..."
-                value={desc}
-                onChange={(e) => setDesc(e.target.value)}
+                value={isUpdating ? editedTask.desc : newTask.desc}
+                onChange={(e) => {
+                  isUpdating
+                    ? setEditedTask((prevState) => ({
+                        ...prevState,
+                        desc: e.target.value,
+                      }))
+                    : setNewTask((prevState) => ({
+                        ...prevState,
+                        desc: e.target.value,
+                      }));
+                }}
                 required
               />
             </Form.Group>
-          </Form>
-          <>
             <br />
-            <div className="taskItem d-flex justify-content-between mb-4 ">
+            <Form.Group className="taskItem d-flex justify-content-between mb-4 ">
               <p>Etat :</p>
               <ButtonGroup>
-                {radios.map((radio, idx) => (
+                {states.map((state, idx) => (
                   <ToggleButton
                     key={idx}
-                    id={radio.value}
+                    id={state.value}
                     type="radio"
-                    variant={radio.className}
-                    name="radio"
-                    value={radio.name}
-                    checked={statut === radio.value}
-                    onChange={(e) => setStatut(e.currentTarget.id)}
+                    name="radio1"
+                    value={state.name}
+                    checked={
+                      isUpdating
+                        ? editedTask.state === state.value
+                        : newTask.state === state.value
+                    }
+                    variant={state.className}
+                    required
+                    onChange={(event) =>
+                      isUpdating
+                        ? setEditedTask((prevState) => ({
+                            ...prevState,
+                            state: parseInt(event.target.id),
+                          }))
+                        : setNewTask((prevState) => ({
+                            ...prevState,
+                            state: parseInt(event.target.id),
+                          }))
+                    }
                   >
-                    {radio.name}
+                    {state.name}
                   </ToggleButton>
                 ))}
               </ButtonGroup>
-            </div>
-            <div className="taskItem d-flex justify-content-between mb-4 align-items-center">
+            </Form.Group>
+            <Form.Group className="taskItem d-flex justify-content-between mb-4 align-items-center">
               <p className="align-self-center">Echéance:</p>
 
               <DatePicker
                 locale="fr"
                 dateFormat="dd/MM/yy"
-                selected={dueDate}
-                onChange={(date) => setDueDate(date)}
+                selected={newTask.dueDate}
+                onChange={(date) => {
+                  isUpdating
+                    ? setEditedTask((prevState) => ({
+                        ...prevState,
+                        dueDate: date,
+                      }))
+                    : setNewTask((prevState) => ({
+                        ...prevState,
+                        dueDate: date,
+                      }));
+                }}
               />
-            </div>
-            <div className="taskItem d-flex justify-content-between mb-4">
-              <p>Importance :</p>
+            </Form.Group>
+
+            <Form.Group className="taskItem d-flex justify-content-between mb-4">
+              <p>Priorité : </p>
               <DropdownButton
-                align="end"
-                title={priority ? priority : "Priorité"}
+                align="start"
+                title={priority(editedTask.priority)}
                 id="dropdown-menu-align-end"
-                onSelect={(e) => setPriority(e)}
-                multiple={true}
+                required
               >
-                <Dropdown.Item name="Moyenne" eventKey={1}>Basse</Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item eventKey={2} active>Moyenne</Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item eventKey={3}>Haute</Dropdown.Item>
+                {priorities.map((priority, idx) => {
+                  return (
+                    <Dropdown.Item
+                      key={idx}
+                      id={priority.value}
+                      type="radio"
+                      variant={priority.className}
+                      name="priorite"
+                      value={priority.name}
+                      checked={
+                        isUpdating
+                          ? editedTask.priority === priority.value
+                          : newTask.priority === priority.value
+                      }
+                      required
+                      onClick={(e) => {
+                        isUpdating
+                          ? setEditedTask((prevState) => ({
+                              ...prevState,
+                              priority: e.target.id,
+                            }))
+                          : setNewTask((prevState) => ({
+                              ...prevState,
+                              priority: e.target.id,
+                            }));
+                      }}
+                    >
+                      {priority.name}
+                    </Dropdown.Item>
+                  );
+                })}
               </DropdownButton>
-            </div>
-            <div className="taskItem d-flex justify-content-between mb-4">
+            </Form.Group>
+
+            <Form.Group className="taskItem d-flex justify-content-between mb-4">
               <label>Créer par:</label>
               <Select
+                // value={editedTask.createdBy.label }
                 options={optionAssignments}
-                onChange={(selectedOwnerOption) =>
-                  setAssignedBy(selectedOwnerOption)
-                }
+                onChange={(selectedOwnerOption) => {
+                  setNewTask((prevState) => ({
+                    ...prevState,
+                    createdBy: selectedOwnerOption,
+                  }));
+                }}
+                required
               />
-            </div>
-            <div className="taskItem d-flex justify-content-between mb-4">
+            </Form.Group>
+            <Form.Group className="taskItem d-flex justify-content-between mb-4">
               <label>Affécter à:</label>
               <Select
                 options={optionAssignments}
-                onChange={(selectedOption) => setAssignment(selectedOption)}
+                onChange={(selectedOption) => {
+                  isUpdating
+                    ? setEditedTask((prevState) => ({
+                        ...prevState,
+                        assignedTo: selectedOption,
+                      }))
+                    : setNewTask((prevState) => ({
+                        ...prevState,
+                        assignedTo: selectedOption,
+                      }));
+                }}
                 isMulti
+                required
               />
-            </div>
-          </>
+            </Form.Group>
+            {/* </Form> */}
+          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+          <Button variant="secondary" onClick={() => handleClose()}>
             Annuler
           </Button>
           <Button
             variant="primary"
             onClick={
               isUpdating
-                ? () => {
-                  // TO FIX
-                    updateTask(
-                      taskId,
-                      taskTitle,
-                      // setTasks,
-                      setTaskTitle,
-                      setIsUpdating
-                    );
-                    handleClose();
-                  }
-                : () => {
+                ? () =>
+                    updateTask(editedTask, setTasks, handleClose, originalTask)
+                : () =>
                     addTask(
-                      title,
-                      setTitle,
-                      desc,
-                      setDesc,
-                      priority,
-                      setPriority,
-                      statut,
-                      setStatut,
-                      dueDate,
-                      setDueDate,
-                      assignedBy,
-                      setAssignedBy,
-                      assignment,
-                      setAssignment
-                      // setTasks
-                    );
-                    handleClose();
-                  }
+                      newTask,
+                      setTasks,
+                      handleClose,
+                      setNewTask,
+                      originalTask,
+                      setIsUpdating
+                    )
             }
           >
-            Enregistrer
+            {isUpdating ? "Mettre à jour" : "Ajouter"}
           </Button>
         </Modal.Footer>
       </Modal>
