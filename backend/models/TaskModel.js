@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+
 const taskSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -27,11 +28,14 @@ const taskSchema = new mongoose.Schema({
   },
   assignedTo: {
     type: [{}],
-    required: true,
+    required: false,
   },
 });
 
+
+
 // Generate "createdAt & updateAt"
-taskSchema.set('timestamps', true)
+taskSchema.set("timestamps", true);
 
 module.exports = mongoose.model("Task", taskSchema);
+

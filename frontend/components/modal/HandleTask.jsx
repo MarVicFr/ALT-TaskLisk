@@ -1,92 +1,67 @@
-import { useEffect, useState } from "react";
-import Button from "react-bootstrap/Button";
+import React, { useState } from "react";
+import { addTask, updateTask } from "../../utils/HandleApi";
+
+// BootStrap
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import ToggleButton from "react-bootstrap/ToggleButton";
-
-// Calendar imports
-import DatePicker from "react-datepicker";
-import { registerLocale } from "react-datepicker";
-import fr from "date-fns/locale/fr";
-registerLocale("fr", fr);
-
 import Dropdown from "react-bootstrap/Dropdown";
 import DropdownButton from "react-bootstrap/DropdownButton";
 
-import "react-datepicker/dist/react-datepicker.css";
-
 import Select from "react-select";
 
-import { addTask, updateTask } from "../utils/HandleApi";
+import DatePicker from "react-datepicker";
+import { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import fr from "date-fns/locale/fr";
+registerLocale("fr", fr);
 
-const ModalTask = ({
-  tasks,
-  show,
-  handleClose,
-  handleShow,
-  isUpdating,
-  setIsUpdating,
-  setTasks,
-  updateId,
-}) => {
-  console.log("Mes tasks MODAL :", tasks);
+const HandleTask = (setTasks) => {
+  // Modal Handlers
+  const [show, setShow] = useState(false);
+  // Modals
+  const handleShow = () => setShow(true);
+  const handleClose = () => {
+    setShow(false);
+    setIsUpdating(false);
+  };
 
   // Original task
   const originalTask = {
     title: "",
     desc: "",
-    state: 2,
+    state: 1,
     dueDate: "",
-    priority: 2,
+    priority: 1,
     createdBy: {},
     createdAt: new Date(),
     assignedTo: [],
   };
 
+  const [isUpdating, setIsUpdating] = useState(false);
+
   // NewTask
   const [newTask, setNewTask] = useState(originalTask);
   const [editedTask, setEditedTask] = useState(originalTask);
 
-  useEffect(() => {
-    tasks.map((task) => {
-      if (task._id == updateId) {
-        setEditedTask(task);
-      }
-    });
-  }, [updateId]);
+  //  THIS PART NEED optimization !!
 
   // Task State
   const states = [
-    { name: "En attente", value: 1, className: "outline-primary" },
-    { name: "En cours", value: 2, className: "outline-warning" },
-    { name: "Terminé", value: 3, className: "outline-success" },
+    { name: "En attente", value: 0, className: "outline-primary" },
+    { name: "En cours", value: 1, className: "outline-warning" },
+    { name: "Terminé", value: 2, className: "outline-success" },
+    // { name: "Toutes", value: 4, className: "outline-success" },
   ];
 
   // Task Priority
   const priorities = [
-    { name: "Basse", value: 1, className: "outline-info" },
-    { name: "Moyenne", value: 2, className: "outline-secondary" },
-    { name: "Haute", value: 3, className: "outline-danger" },
+    { name: "Basse", value: 0, className: "outline-info" },
+    { name: "Moyenne", value: 1, className: "outline-secondary" },
+    { name: "Haute", value: 2, className: "outline-danger" },
   ];
-
-  const optionAssignments = [
-    { value: "jack", label: "Jack" },
-    { value: "paul", label: "Paul" },
-    { value: "pierre", label: "Pierre" },
-    { value: "joelle", label: "Joëlle" },
-    { value: "romain", label: "Romain" },
-    { value: "florian", label: "Florian" },
-    { value: "marine", label: "Marine" },
-    { value: "amine", label: "Amine" },
-    { value: "carole", label: "Carole" },
-  ];
-
-  // Convert State
-  const statut = (item) =>
-    radios.map((el) => {
-      if (item.state === el.value) return el.name;
-    });
 
   // Convert priority
   const priority = (item) => {
@@ -100,18 +75,31 @@ const ModalTask = ({
     return found;
   };
 
-  console.log("editedTask.createdBy.label", editedTask.createdBy.label);
+  // To replace with API request
+  const optionAssignments = [
+    { value: "jack", label: "Jack" },
+    { value: "paul", label: "Paul" },
+    { value: "pierre", label: "Pierre" },
+    { value: "joelle", label: "Joëlle" },
+    { value: "romain", label: "Romain" },
+    { value: "florian", label: "Florian" },
+    { value: "marine", label: "Marine" },
+    { value: "amine", label: "Amine" },
+    { value: "carole", label: "Carole" },
+  ];
 
   return (
-    <>
-      <Button variant="primary" className="m-2" onClick={handleShow}>
+    <div>
+      <Button
+        variant="primary"
+        className="m-2"
+        onClick={() => {
+          handleShow();
+          // if (createUser) setCreateUser(false);
+        }}
+      >
         Ajouter une tâche
       </Button>
-      <ButtonGroup style={{display: 'flex'}}>
-      <Button variant="info">En attente</Button>
-        <Button variant="warning">En cours</Button>
-        <Button variant="success">Terminée</Button>
-      </ButtonGroup>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           {isUpdating ? (
@@ -122,7 +110,7 @@ const ModalTask = ({
         </Modal.Header>
         <Modal.Body>
           <Form className="was-validated">
-            <Form.Group className="taskItem d-flex justify-content-between mb-4 ">
+            <Form.Group className=" d-flex justify-content-between mb-4 ">
               <Form.Label>Nom de la tâche :</Form.Label>
               <Form.Control
                 type="text"
@@ -165,41 +153,43 @@ const ModalTask = ({
               />
             </Form.Group>
             <br />
-            <Form.Group className="taskItem d-flex justify-content-between mb-4 ">
+            <Form.Group className=" d-flex justify-content-between mb-4 ">
               <p>Etat :</p>
               <ButtonGroup>
                 {states.map((state, idx) => (
                   <ToggleButton
                     key={idx}
-                    id={state.value}
+                    // id={`priority-${idx}`}
+                    id={priority.value}
                     type="radio"
                     name="radio1"
                     value={state.name}
                     checked={
                       isUpdating
-                        ? editedTask.state === state.value
-                        : newTask.state === state.value
+                      ? editedTask.state === state.value
+                      :
+                      newTask.state === state.value
                     }
                     variant={state.className}
                     required
-                    onChange={(event) =>
+                    onClick={(e) => {
                       isUpdating
                         ? setEditedTask((prevState) => ({
                             ...prevState,
-                            state: parseInt(event.target.id),
+                            state: e.target.id,
                           }))
                         : setNewTask((prevState) => ({
                             ...prevState,
-                            state: parseInt(event.target.id),
-                          }))
-                    }
+                            state: idx,
+                          }));
+                    }}
                   >
                     {state.name}
                   </ToggleButton>
                 ))}
               </ButtonGroup>
             </Form.Group>
-            <Form.Group className="taskItem d-flex justify-content-between mb-4 align-items-center">
+            <Form.Group className=" d-flex justify-content-between mb-4 align-items-center">
               <p className="align-self-center">Echéance:</p>
 
               <DatePicker
@@ -220,11 +210,12 @@ const ModalTask = ({
               />
             </Form.Group>
 
-            <Form.Group className="taskItem d-flex justify-content-between mb-4">
+            <Form.Group className=" d-flex justify-content-between mb-4">
               <p>Priorité : </p>
               <DropdownButton
                 align="start"
-                title={priority(editedTask.priority)}
+                // NEED FIND FIX TO EDITEDTASK
+                title={priority(newTask.priority)}
                 id="dropdown-menu-align-end"
                 required
               >
@@ -244,6 +235,7 @@ const ModalTask = ({
                       }
                       required
                       onClick={(e) => {
+                        console.log("priority and idx: ", priority, idx);
                         isUpdating
                           ? setEditedTask((prevState) => ({
                               ...prevState,
@@ -251,7 +243,7 @@ const ModalTask = ({
                             }))
                           : setNewTask((prevState) => ({
                               ...prevState,
-                              priority: e.target.id,
+                              priority: idx,
                             }));
                       }}
                     >
@@ -262,8 +254,13 @@ const ModalTask = ({
               </DropdownButton>
             </Form.Group>
 
-            <Form.Group className="taskItem d-flex justify-content-between mb-4">
-              <label>Créer par:</label>
+            <Form.Group className=" d-flex justify-content-between mb-4">
+              <label>
+                Créer par:{" "}
+                {isUpdating
+                  ? editedTask.createdBy.value
+                  : newTask.createdBy.value}
+              </label>
               <Select
                 // value={editedTask.createdBy.label }
                 options={optionAssignments}
@@ -276,8 +273,13 @@ const ModalTask = ({
                 required
               />
             </Form.Group>
-            <Form.Group className="taskItem d-flex justify-content-between mb-4">
-              <label>Affécter à:</label>
+            <Form.Group className=" d-flex justify-content-between mb-4">
+              <label>
+                Affécter à:{" "}
+                {isUpdating
+                  ? editedTask.assignedTo.map((el) => el.label)
+                  : newTask.assignedTo.value}
+              </label>
               <Select
                 options={optionAssignments}
                 onChange={(selectedOption) => {
@@ -323,8 +325,8 @@ const ModalTask = ({
           </Button>
         </Modal.Footer>
       </Modal>
-    </>
+    </div>
   );
 };
 
-export default ModalTask;
+export default HandleTask;

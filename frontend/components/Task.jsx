@@ -37,6 +37,8 @@ const Task = ({ item, setTasks, setIsUpdating, isUpdating, updateId, setUpdateId
     return found;
   };
 
+  console.log("THE ITEM :", item);
+
     
   return (
     <div className="task">
@@ -51,7 +53,6 @@ const Task = ({ item, setTasks, setIsUpdating, isUpdating, updateId, setUpdateId
         </div>
       )}
       <div className="fs-6">
-        {/* Echéance au :{format(new Date(item.dueDate), "fr-FR")} */}
         Echéance au :{item.dueDate}
       </div>
       <div className="text">Importance :{priority(item.state)}</div>
@@ -62,6 +63,7 @@ const Task = ({ item, setTasks, setIsUpdating, isUpdating, updateId, setUpdateId
           onClick={() => {
             setIsUpdating(!isUpdating)
             setUpdateId(item._id)
+            setTasks
           }}
         />
         <AiFillDelete
